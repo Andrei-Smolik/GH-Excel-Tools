@@ -33,14 +33,17 @@ namespace GH_Excel_Tools
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddTextParameter("FILE", "FILE", "", GH_ParamAccess.item);
+            pManager.AddTextParameter("PATH", "PATH", "", GH_ParamAccess.item);
+            pManager.AddTextParameter("NAME", "NAME", "", GH_ParamAccess.item);
             pManager.AddGenericParameter("DATA", "DATA", "", GH_ParamAccess.tree);
             
             pManager.AddGenericParameter("MODIFY", "", "", GH_ParamAccess.list);
             pManager.AddTextParameter("SHEET", "", "", GH_ParamAccess.item, "Sheet1");
+            pManager[3].Optional = true;
+
             pManager.AddBooleanParameter("SAVE", "", "", GH_ParamAccess.item);
 
-            pManager[3].Optional = true;
+            
 
         }
 
@@ -64,17 +67,21 @@ namespace GH_Excel_Tools
             GH_Structure<IGH_Goo> dataGoo;
             DataTree<string> data = new DataTree<string>();
             //List<string> debugStrings = new List<string>();//debug
+            string path = "";
             string fileName = "Excel File";
             bool saveState = false;
             List<ExcelProperties> excelPropertiesList = new List<ExcelProperties>();
             string sheetName = "Sheet1";
 
-            if (!DA.GetData(0, ref fileName)) return;//file name
-            if (!DA.GetDataTree(1, out dataGoo)) return;//data
-            DA.GetDataList(2, excelPropertiesList);//properties
+            if (!DA.GetData(0, ref path)) return;//file path
+            if (!DA.GetData(1, ref fileName)) return;//file name
+            if (!DA.GetDataTree(2, out dataGoo)) return;//data
+            DA.GetDataList(3, excelPropertiesList);//properties
 
-            DA.GetData(3, ref sheetName);//sheet name
-            if (!DA.GetData(4, ref saveState)) return;
+            DA.GetData(4, ref sheetName);//sheet name
+            if (!DA.GetData(5, ref saveState)) return;
+
+            fileName = $@"{path}\{fileName}.xlsx";
 
             //create Excel file:
             var workbook = new XLWorkbook();
@@ -115,7 +122,6 @@ namespace GH_Excel_Tools
                 if (!fileExists)
                 {
                     workbook.SaveAs($@"{fileName}");
-                    //goto FINISH;
                 }
                 else
                 {
